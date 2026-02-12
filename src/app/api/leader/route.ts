@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Pastikan path ini benar merujuk ke file lib/db kamu
 import { supabase } from '@/lib/db'; 
 
-// Baris ini adalah KUNCI agar tidak error saat build di Vercel
+// WAJIB ADA: Ini mencegah Vercel menjalankan file ini saat build
 export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
-      .from('leader')
-      .select('*')
-      .eq('id', 1)
-      .single();
-
+    const { data, error } = await supabase.from('leader').select('*').eq('id', 1).single();
     if (error) throw error;
     return NextResponse.json(data);
   } catch (error: any) {
@@ -33,7 +27,6 @@ export async function PUT(request: NextRequest) {
       })
       .eq('id', 1)
       .select();
-
     if (error) throw error;
     return NextResponse.json(data);
   } catch (error: any) {
