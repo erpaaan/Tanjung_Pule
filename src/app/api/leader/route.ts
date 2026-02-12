@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Gunakan instance supabase pusat agar konfigurasi seragam
+// Pastikan path ini benar merujuk ke file lib/db kamu
 import { supabase } from '@/lib/db'; 
 
-// Wajib ditambahkan agar Next.js tidak mencoba fetch data saat proses build
+// Baris ini adalah KUNCI agar tidak error saat build di Vercel
 export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
@@ -16,7 +16,6 @@ export async function GET() {
     if (error) throw error;
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error('Leader GET error:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -38,7 +37,6 @@ export async function PUT(request: NextRequest) {
     if (error) throw error;
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error('Leader PUT error:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
