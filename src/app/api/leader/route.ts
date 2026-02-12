@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Gunakan supabase yang sudah kita perbaiki di lib/db.ts tadi
+// Gunakan instance supabase pusat agar konfigurasi seragam
 import { supabase } from '@/lib/db'; 
 
-export const dynamic = 'force-dynamic'; // Tambahkan ini agar tidak error saat build
+// Wajib ditambahkan agar Next.js tidak mencoba fetch data saat proses build
+export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
   try {
