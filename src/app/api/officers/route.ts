@@ -1,28 +1,56 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+// Gunakan instance supabase pusat agar seragam dan tidak typo
+import { supabase } from '@/lib/db'; 
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// WAJIB: Agar Vercel tidak mencoba menjalankan ini saat proses build
+export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
-  const { data, error } = await supabase.from('officers').select('*').order('id', { ascending: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  try {
+    const { data, error } = await supabase
+      .from('officers')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { data, error } = await supabase.from('officers').insert([body]).select();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+  try {
+    const body = await request.json();
+    const { data, error } = await supabase
+      .from('officers')
+      .insert([body])
+      .select();
+
+    if (error) throw error;
+    return NextResponse.json(data, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
-  const { error } = await supabase.from('officers').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ message: 'Deleted' });
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('officers')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return NextResponse.json({ message: 'Deleted' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
