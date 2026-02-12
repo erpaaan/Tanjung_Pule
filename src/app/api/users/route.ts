@@ -1,68 +1,42 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/db'; 
+import { NextResponse } from 'next/server';
+import { supabase } from '../../../lib/db';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
+export async function GET() {
+ try {
+ const { data, error } = await supabase
+ .from('users')
+ .select('*');
 
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    if (!data) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
+if (error) throw error;
+return NextResponse.json(data);
+ } catch (error) {
+ console.error(error);
+ return NextResponse.json({ error: 'Database error' }, { status: 500 });
+ }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
+export async function POST(request: Request) {
+ try {
+const body = await request.json();
+const { name, email } = body;
 
-  try {
-    const body = await request.json();
-    const { name, email } = body;
+if (!name || !email) {
+return NextResponse.json(
+ { error: 'Name and email are required' },
+ { status: 400 }
+ );
+ }
 
-    const { data, error } = await supabase
-      .from('users')
-      .update({ name, email })
-      .eq('id', id)
-      .select();
+ const { data, error } = await supabase
+ .from('users')
+.insert([{ name, email }])
+.select();
 
-    if (error) throw error;
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
+ if (error) throw error;
+ return NextResponse.json(data, { status: 201 });
+ } catch (error) {
+ console.error(error);
+ return NextResponse.json({ error: 'Database error' }, { status: 500 });
+}
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-
-  try {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-    return NextResponse.json({ message: 'User deleted' });
-  } catch (error) {
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
-  }
-}
-// Final check for Tanjung Pule website deployment
