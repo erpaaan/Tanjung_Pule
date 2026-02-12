@@ -1,39 +1,52 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../../lib/db';
 
+/**
+ * Interface untuk mendefinisikan tipe params sebagai Promise
+ * Ini adalah standar wajib di Next.js 15.
+ */
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
+  // Menunggu Promise params agar id dapat diakses secara asinkron
+  const { id } = await params;
+
   try {
     const { data, error } = await supabase
       .from('news')
       .select('*')
-      .eq('id', parseInt(params.id))
+      .eq('id', parseInt(id))
       .single();
 
     if (error) throw error;
     if (!data) {
-      return NextResponse.json({ error: 'News not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Berita tidak ditemukan' }, { status: 404 });
     }
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    console.error('Fetch error:', error);
+    return NextResponse.json({ error: 'Gagal memuat database' }, { status: 500 });
   }
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
+  const { id } = await params;
+
   try {
     const body = await request.json();
     const { title, content } = body;
 
     if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Judul dan konten wajib diisi' },
         { status: 400 }
       );
     }
@@ -41,31 +54,33 @@ export async function PUT(
     const { data, error } = await supabase
       .from('news')
       .update({ title, content })
-      .eq('id', parseInt(params.id))
+      .eq('id', parseInt(id))
       .select();
 
     if (error) throw error;
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    console.error('Update error:', error);
+    return NextResponse.json({ error: 'Gagal memperbarui database' }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: RouteParams
 ) {
+  const { id } = await params;
+
   try {
     const { error } = await supabase
       .from('news')
       .delete()
-      .eq('id', parseInt(params.id));
+      .eq('id', parseInt(id));
 
     if (error) throw error;
-    return NextResponse.json({ success: true, message: 'News deleted' });
+    return NextResponse.json({ success: true, message: 'Berita berhasil dihapus' });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+    console.error('Delete error:', error);
+    return NextResponse.json({ error: 'Gagal menghapus data' }, { status: 500 });
   }
 }
