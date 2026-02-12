@@ -1,12 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+// Gunakan instance terpusat agar konfigurasi seragam
+import { supabase } from '@/lib/db'; 
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// WAJIB: Mencegah error 'supabaseKey is required' saat proses build di Vercel
+export const dynamic = 'force-dynamic'; 
 
-// GET: Ambil data statistik untuk ditampilkan di Home
 export async function GET() {
   try {
     const { data, error } = await supabase
@@ -22,7 +20,6 @@ export async function GET() {
   }
 }
 
-// PUT: Update data dari Dashboard Admin
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json(); 
