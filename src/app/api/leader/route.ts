@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db'; 
 
-// WAJIB ADA: Ini mencegah Vercel menjalankan file ini saat build
+// WAJIB: Mencegah error 'supabaseKey is required' saat build
 export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
