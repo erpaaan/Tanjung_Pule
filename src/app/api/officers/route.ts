@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db'; 
 
-// WAJIB: Supaya build Vercel tidak gagal lagi
+// WAJIB: Ini yang akan menghilangkan error "supabaseKey is required" saat build
 export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
@@ -37,14 +37,9 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
-    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });
-
-    const { error } = await supabase
-      .from('officers')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('officers').delete().eq('id', id);
     if (error) throw error;
     return NextResponse.json({ message: 'Deleted' });
   } catch (error: any) {
