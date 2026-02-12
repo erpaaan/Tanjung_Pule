@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Coba salah satu di bawah ini sampai garis merahnya hilang:
 import { supabase } from '@/lib/db'; 
-// ATAU jika @ tidak jalan:
-// import { supabase } from '../../../lib/db';
-/**
- * GET: Ambil detail satu user berdasarkan ID
- */
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // Wajib Promise di Next.js 16
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params; // Wajib di-await
+  const { id } = await params;
 
   try {
     const { data, error } = await supabase
@@ -29,9 +24,6 @@ export async function GET(
   }
 }
 
-/**
- * PUT: Update data user (Optional jika kamu butuh)
- */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -55,9 +47,6 @@ export async function PUT(
   }
 }
 
-/**
- * DELETE: Hapus user
- */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
