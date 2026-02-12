@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/db'; 
 
-// BARIS PALING PENTING: Memberitahu Vercel agar tidak menjalankan file ini saat build!
+// WAJIB: Supaya build Vercel tidak gagal lagi
 export const dynamic = 'force-dynamic'; 
 
 export async function GET() {
@@ -13,7 +13,7 @@ export async function GET() {
 
     if (error) throw error;
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
     return NextResponse.json(data, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -37,10 +37,17 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const { error } = await supabase.from('officers').delete().eq('id', id);
+
+    if (!id) return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+
+    const { error } = await supabase
+      .from('officers')
+      .delete()
+      .eq('id', id);
+
     if (error) throw error;
     return NextResponse.json({ message: 'Deleted' });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
